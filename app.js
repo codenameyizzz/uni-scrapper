@@ -2,6 +2,7 @@ const SOURCE_URL =
   "https://www.usnews.com/best-graduate-schools/top-computer-science-schools/computer-science-rankings";
 const METHODOLOGY_URL =
   "https://www.usnews.com/education/best-graduate-schools/articles/science-schools-methodology";
+const DATASET_UPDATED_AT = "2026-06-11T12:01:33+07:00";
 
 const rows = Array.isArray(window.USNEWS_CS_RANKINGS)
   ? window.USNEWS_CS_RANKINGS.map((row, index) => normalizeRow(row, index))
@@ -32,6 +33,7 @@ const elements = {
   pageIndicator: document.querySelector("#page-indicator"),
   resultMeta: document.querySelector("#result-meta"),
   heroStats: document.querySelector("#hero-stats"),
+  lastUpdatedIndicator: document.querySelector("#last-updated-indicator"),
   featuredGrid: document.querySelector("#featured-grid"),
   overviewSummary: document.querySelector("#overview-summary"),
   tableBody: document.querySelector("#table-body"),
@@ -50,6 +52,7 @@ initialize();
 function initialize() {
   populateStateFilter();
   bindEvents();
+  renderLastUpdated();
   renderHeroStats();
   setActiveView(appState.activeView, false);
   renderAll();
@@ -240,6 +243,13 @@ function renderHeroStats() {
       `
     )
     .join("");
+}
+
+function renderLastUpdated() {
+  const formatted = formatLastUpdated(DATASET_UPDATED_AT);
+  elements.lastUpdatedIndicator.textContent = formatted
+    ? `Last updated: ${formatted}`
+    : "Last updated: local dataset";
 }
 
 function renderOverview(items) {
@@ -901,6 +911,23 @@ function formatMoney(value) {
     currency: "USD",
     maximumFractionDigits: 0,
   }).format(value);
+}
+
+function formatLastUpdated(value) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    timeZoneName: "short",
+  }).format(date);
 }
 
 function escapeHtml(value) {

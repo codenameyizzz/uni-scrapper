@@ -276,6 +276,24 @@ body {
   line-height: 1.8;
 }
 
+.hero-meta {
+  margin-top: 18px;
+}
+
+.update-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fbfbfb;
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
 .metric-card {
   padding: 20px;
   border: 1px solid var(--line);
@@ -1040,6 +1058,16 @@ body {
     font-size: 0.92rem;
   }
 
+  .hero-meta {
+    margin-top: 14px;
+  }
+
+  .update-pill {
+    min-height: 36px;
+    padding-inline: 12px;
+    font-size: 0.82rem;
+  }
+
   .section-head,
   .detail-top {
     gap: 10px;
@@ -1382,6 +1410,13 @@ body {
   .section-head h2,
   .compact-head h2 {
     font-size: 1.18rem;
+  }
+
+  .update-pill {
+    width: 100%;
+    justify-content: center;
+    min-height: 34px;
+    font-size: 0.78rem;
   }
 
   .metric-card,
