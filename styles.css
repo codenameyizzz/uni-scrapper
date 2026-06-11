@@ -29,6 +29,10 @@ body {
   font-family: "Segoe UI Variable Display", "Aptos", "Segoe UI", sans-serif;
 }
 
+body.modal-open {
+  overflow: hidden;
+}
+
 .page-bg {
   position: fixed;
   inset: 0;
@@ -805,8 +809,22 @@ body {
 
 .open-link,
 .ghost-link,
-.detail-link {
+.detail-link,
+.action-link {
   color: var(--text);
+}
+
+.action-link {
+  min-width: 88px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
 }
 
 .pagination-bar {
@@ -951,6 +969,12 @@ body {
   margin-top: 20px;
 }
 
+.detail-action-button {
+  color: #fff;
+  background: #121214;
+  border-color: #121214;
+}
+
 .state-list {
   gap: 14px;
 }
@@ -1005,6 +1029,124 @@ body {
   letter-spacing: 0.02em;
 }
 
+.modal-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 17, 18, 0.44);
+  backdrop-filter: blur(10px);
+}
+
+.university-modal {
+  position: relative;
+  z-index: 1;
+  width: min(1080px, 100%);
+  max-height: calc(100vh - 36px);
+  padding: 22px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8f8f6 100%);
+  box-shadow: 0 32px 90px rgba(17, 17, 18, 0.18);
+}
+
+.modal-topbar,
+.modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.modal-topbar {
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--line);
+}
+
+.modal-close-button,
+.modal-nav-button {
+  min-height: 40px;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.modal-close-button {
+  min-width: 92px;
+}
+
+.modal-close-button:focus-visible,
+.modal-nav-button:focus-visible,
+.action-link:focus-visible {
+  outline: 2px solid rgba(170, 88, 69, 0.65);
+  outline-offset: 2px;
+}
+
+.modal-content {
+  margin-top: 18px;
+}
+
+.modal-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, 0.95fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.modal-copy {
+  min-width: 0;
+}
+
+.modal-media {
+  min-width: 0;
+}
+
+.modal-photo {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: #f1f1f1;
+}
+
+.modal-metrics {
+  margin-top: 18px;
+}
+
+.modal-footer {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+.modal-position {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.modal-nav-button:disabled {
+  cursor: not-allowed;
+  color: var(--muted-soft);
+  background: #f4f4f2;
+}
+
 .empty-state {
   padding: 40px 16px 20px;
   text-align: center;
@@ -1046,6 +1188,10 @@ body {
   .hero-row,
   .overview-grid,
   .content-row {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-hero {
     grid-template-columns: 1fr;
   }
 }
@@ -1275,7 +1421,8 @@ body {
   .resource-link,
   .ghost-link,
   .open-link,
-  .detail-link {
+  .detail-link,
+  .action-link {
     width: 100%;
     min-height: 40px;
     padding-inline: 12px;
@@ -1465,6 +1612,30 @@ body {
     padding: 12px 14px;
   }
 
+  .university-modal {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  .modal-topbar,
+  .modal-footer {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-footer {
+    gap: 10px;
+  }
+
+  .modal-close-button,
+  .modal-nav-button {
+    width: 100%;
+  }
+
+  .modal-position {
+    text-align: center;
+  }
+
   .info-stack,
   .list-stack,
   .link-stack,
@@ -1590,9 +1761,14 @@ body {
   .ghost-link,
   .open-link,
   .detail-link,
+  .action-link,
   .pager-button {
     min-height: 38px;
     font-size: 0.81rem;
+  }
+
+  .modal-shell {
+    padding: 10px;
   }
 
   .page-number {

@@ -12,8 +12,11 @@ const ALLOWED_SORTS = ["rank-asc", "name-asc", "tuition-desc", "tuition-asc", "e
 const rows = Array.isArray(window.USNEWS_CS_RANKINGS)
   ? window.USNEWS_CS_RANKINGS.map((row, index) => normalizeRow(row, index))
   : [];
+let currentUniversityRows = [];
+let lastFocusedElement = null;
 
 const appState = getInitialAppState();
+appState.isModalOpen = false;
 
 const elements = {
   navButtons: [...document.querySelectorAll("[data-view]")],
@@ -37,6 +40,12 @@ const elements = {
   tableBody: document.querySelector("#table-body"),
   detailCard: document.querySelector("#detail-card"),
   emptyState: document.querySelector("#empty-state"),
+  modalShell: document.querySelector("#university-modal-shell"),
+  modalContent: document.querySelector("#modal-content"),
+  modalCloseButton: document.querySelector("#modal-close-button"),
+  modalPrevButton: document.querySelector("#modal-prev-button"),
+  modalNextButton: document.querySelector("#modal-next-button"),
+  modalPosition: document.querySelector("#modal-position"),
   stateGrid: document.querySelector("#state-grid"),
   stateList: document.querySelector("#state-list"),
   highestTuitionList: document.querySelector("#highest-tuition-list"),
@@ -109,6 +118,12 @@ function bindEvents() {
   });
 
   elements.tableBody.addEventListener("click", (event) => {
+    const modalTrigger = event.target.closest("[data-open-modal]");
+    if (modalTrigger) {
+      openUniversityModal(modalTrigger.dataset.openModal);
+      return;
+    }
+
     if (event.target.closest("a")) {
       return;
     }
@@ -120,6 +135,15 @@ function bindEvents() {
 
     appState.selectedId = row.dataset.id;
     renderUniversityTable(getSearchFilteredRows());
+  });
+
+  elements.detailCard.addEventListener("click", (event) => {
+    const modalTrigger = event.target.closest("[data-open-modal]");
+    if (!modalTrigger) {
+      return;
+    }
+
+    openUniversityModal(modalTrigger.dataset.openModal);
   });
 
   elements.prevPageButton.addEventListener("click", () => {
@@ -156,6 +180,36 @@ function bindEvents() {
     }
 
     clearFilter(button.dataset.clearFilter);
+  });
+
+  elements.modalShell.addEventListener("click", (event) => {
+    if (event.target.closest("[data-close-modal]")) {
+      closeUniversityModal();
+    }
+  });
+
+  elements.modalCloseButton.addEventListener("click", closeUniversityModal);
+  elements.modalPrevButton.addEventListener("click", () => moveModalSelection(-1));
+  elements.modalNextButton.addEventListener("click", () => moveModalSelection(1));
+
+  window.addEventListener("keydown", (event) => {
+    if (!appState.isModalOpen) {
+      return;
+    }
+
+    if (event.key === "Escape") {
+      closeUniversityModal();
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      moveModalSelection(-1);
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      moveModalSelection(1);
+    }
   });
 
   elements.stateGrid.addEventListener("click", handleJumpToState);
@@ -372,6 +426,7 @@ function renderAboutData() {
 function renderUniversityTable(searchFiltered) {
   const filtered = applyUniversityFilters(searchFiltered);
   const sorted = sortRows(filtered, appState.sortBy);
+  currentUniversityRows = sorted;
   const totalPages = Math.max(1, Math.ceil(sorted.length / appState.pageSize));
 
   if (appState.currentPage > totalPages) {
@@ -403,6 +458,7 @@ function renderUniversityTable(searchFiltered) {
   elements.nextPageButton.disabled = appState.currentPage >= totalPages;
   renderPageNumbers(totalPages);
   renderDetailPanel(selectedItem);
+  renderUniversityModal(selectedItem);
   updateUrlState();
 }
 
@@ -620,6 +676,7 @@ function renderTableRow(item) {
       <td data-label="Enrollment"><span class="value-main">${escapeHtml(item.enrollmentLabel)}</span></td>
       <td data-label="Links">
         <div class="link-pair">
+          <button class="action-link" type="button" data-open-modal="${escapeAttribute(item.id)}">Details</button>
           ${renderLinkButton(item.officialUrl, "Official", "open-link")}
           ${renderLinkButton(item.url, "Profile", "ghost-link")}
         </div>
@@ -672,10 +729,137 @@ function renderDetailPanel(item) {
     </div>
 
     <div class="detail-actions">
+      <button class="detail-link action-link detail-action-button" type="button" data-open-modal="${escapeAttribute(item.id)}">Open full details</button>
       ${renderLinkButton(item.officialUrl, "Official university site", "detail-link")}
       ${renderLinkButton(item.url, "Open U.S. News profile", "detail-link")}
     </div>
   `;
+}
+
+function renderUniversityModal(item) {
+  if (!appState.isModalOpen || !item) {
+    hideUniversityModalShell();
+    if (!item) {
+      appState.isModalOpen = false;
+    }
+    return;
+  }
+
+  const currentIndex = currentUniversityRows.findIndex((row) => row.id === item.id);
+  const position = currentIndex >= 0 ? currentIndex + 1 : 0;
+  const total = currentUniversityRows.length;
+
+  elements.modalContent.innerHTML = `
+    <div class="modal-hero">
+      <div class="modal-copy">
+        <div class="detail-top">
+          <div>
+            <p class="section-label">Ranked University</p>
+            <h3>${escapeHtml(item.schoolName)}</h3>
+            <p class="detail-location">${escapeHtml(item.locationLabel)}</p>
+          </div>
+          <div class="detail-badge">${item.rank !== null ? `#${item.rank}` : "N/A"}</div>
+        </div>
+
+        <p class="detail-summary">${escapeHtml(item.summary || "No summary snippet was exposed for this school in the extracted source row.")}</p>
+
+        <div class="detail-grid modal-metrics">
+          <div class="detail-metric">
+            <span>Ranking note</span>
+            <strong>${escapeHtml(item.rankLabel)}</strong>
+          </div>
+          <div class="detail-metric">
+            <span>Tuition</span>
+            <strong>${escapeHtml(item.tuition)}</strong>
+          </div>
+          <div class="detail-metric">
+            <span>Enrollment</span>
+            <strong>${escapeHtml(item.enrollmentLabel)}</strong>
+          </div>
+          <div class="detail-metric">
+            <span>Visible list position</span>
+            <strong>${position > 0 ? `${position} of ${total}` : `1 of ${total}`}</strong>
+          </div>
+        </div>
+
+        <div class="detail-actions">
+          ${renderLinkButton(item.officialUrl, "Official university site", "detail-link")}
+          ${renderLinkButton(item.url, "Open U.S. News profile", "detail-link")}
+        </div>
+      </div>
+
+      ${
+        item.imageUrl
+          ? `<div class="modal-media"><img class="modal-photo" src="${escapeAttribute(item.imageUrl)}" alt="${escapeAttribute(
+              item.schoolName
+            )} campus photo" loading="lazy" /></div>`
+          : ""
+      }
+    </div>
+  `;
+
+  elements.modalPosition.textContent = position > 0 ? `${position} of ${total}` : `1 of ${total}`;
+  elements.modalPrevButton.disabled = currentIndex <= 0;
+  elements.modalNextButton.disabled = currentIndex < 0 || currentIndex >= total - 1;
+  elements.modalShell.classList.remove("hidden");
+  elements.modalShell.setAttribute("aria-hidden", "false");
+  document.body.classList.add("modal-open");
+}
+
+function openUniversityModal(id) {
+  const targetId = id || appState.selectedId;
+  if (!targetId) {
+    return;
+  }
+
+  const currentIndex = currentUniversityRows.findIndex((row) => row.id === targetId);
+  if (currentIndex >= 0) {
+    appState.selectedId = targetId;
+    appState.currentPage = Math.floor(currentIndex / appState.pageSize) + 1;
+  }
+
+  lastFocusedElement = document.activeElement;
+  appState.isModalOpen = true;
+  renderAll();
+  elements.modalCloseButton.focus();
+}
+
+function closeUniversityModal({ restoreFocus = true, preserveState = false } = {}) {
+  if (!preserveState) {
+    appState.isModalOpen = false;
+  }
+
+  hideUniversityModalShell();
+
+  if (restoreFocus && lastFocusedElement instanceof HTMLElement) {
+    lastFocusedElement.focus();
+  }
+}
+
+function moveModalSelection(direction) {
+  if (!appState.isModalOpen || currentUniversityRows.length === 0) {
+    return;
+  }
+
+  const currentIndex = currentUniversityRows.findIndex((row) => row.id === appState.selectedId);
+  const fallbackIndex = currentIndex >= 0 ? currentIndex : 0;
+  const nextIndex = fallbackIndex + direction;
+
+  if (nextIndex < 0 || nextIndex >= currentUniversityRows.length) {
+    return;
+  }
+
+  appState.selectedId = currentUniversityRows[nextIndex].id;
+  appState.currentPage = Math.floor(nextIndex / appState.pageSize) + 1;
+  renderAll();
+}
+
+function hideUniversityModalShell() {
+  elements.modalShell.classList.add("hidden");
+  elements.modalShell.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("modal-open");
+  elements.modalContent.innerHTML = "";
+  elements.modalPosition.textContent = "1 of 1";
 }
 
 function renderStateCard(stat) {
