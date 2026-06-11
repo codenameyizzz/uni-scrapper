@@ -3,106 +3,155 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CS Graduate Schools Explorer</title>
+    <title>Sellora Style University Data List</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="page-shell">
-      <header class="hero">
-        <div class="hero-copy">
-          <p class="eyebrow">U.S. News Graduate Rankings</p>
-          <h1>Computer science schools, presented as a quiet, usable explorer.</h1>
-          <p class="hero-text">
-            Browse, search, and filter scraped university data without the clutter of the source page.
-          </p>
+    <div class="page-bg"></div>
 
-          <div class="hero-actions">
-            <a class="button button-primary" href="#explorer">Open Explorer</a>
-            <a class="button button-secondary" href="output/usnews_cs_rankings.csv">Download CSV</a>
-          </div>
-
-          <div class="top-strip" id="top-strip"></div>
-        </div>
-
-        <aside class="hero-panel">
-          <p class="panel-label">Snapshot</p>
-          <div class="stats-grid" id="stats-grid"></div>
-        </aside>
-      </header>
-
-      <main id="explorer" class="explorer">
-        <section class="toolbar">
-          <div class="toolbar-head">
-            <div>
-              <p class="section-label">Explorer</p>
-              <h2>Find the right program faster</h2>
+    <main class="app-shell">
+      <section class="dashboard-shell">
+        <header class="topbar">
+          <div class="brand-pill">
+            <div class="brand-mark" aria-hidden="true">
+              <span></span>
+              <span></span>
             </div>
-            <p class="result-meta" id="result-meta">Loading data...</p>
+            <span class="brand-name">Sellora</span>
           </div>
 
-          <div class="filters">
-            <label class="field field-search">
-              <span>Search</span>
-              <input
-                id="search-input"
-                type="search"
-                placeholder="University, city, state, tuition, rank"
-                autocomplete="off"
-              />
+          <nav class="main-nav" aria-label="Primary">
+            <button class="nav-pill" type="button">Dashboard</button>
+            <button class="nav-pill nav-pill-active" type="button">Products</button>
+            <button class="nav-pill" type="button">Orders</button>
+            <button class="nav-pill" type="button">Marketing</button>
+            <button class="nav-pill" type="button">Analytics</button>
+          </nav>
+
+          <div class="topbar-tools">
+            <label class="search-pill">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M10.5 4a6.5 6.5 0 1 0 4.03 11.6l4.44 4.44 1.06-1.06-4.44-4.44A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
+                />
+              </svg>
+              <input id="search-input" type="search" placeholder="Search schools..." />
             </label>
 
-            <label class="field">
-              <span>State</span>
-              <select id="state-filter">
-                <option value="all">All states</option>
-              </select>
-            </label>
+            <button class="icon-pill" type="button" aria-label="Notifications">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M12 3a5 5 0 0 0-5 5v2.27c0 .53-.21 1.04-.59 1.41L5 13.09V15h14v-1.91l-1.41-1.41a2 2 0 0 1-.59-1.41V8a5 5 0 0 0-5-5Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z"
+                />
+              </svg>
+            </button>
 
-            <label class="field">
-              <span>Rank band</span>
-              <select id="rank-filter">
-                <option value="all">All ranks</option>
-                <option value="10">Top 10</option>
-                <option value="25">Top 25</option>
-                <option value="50">Top 50</option>
-                <option value="100">Top 100</option>
-              </select>
-            </label>
-
-            <label class="field">
-              <span>Sort by</span>
-              <select id="sort-select">
-                <option value="rank-asc">Rank: best first</option>
-                <option value="name-asc">Name: A to Z</option>
-                <option value="enrollment-desc">Enrollment: high to low</option>
-                <option value="tuition-asc">Tuition: low to high</option>
-                <option value="tuition-desc">Tuition: high to low</option>
-              </select>
-            </label>
+            <div class="avatar-pill">
+              <div class="avatar-dot"></div>
+              <div>
+                <strong>Marketplace Admin</strong>
+                <span>Data operator</span>
+              </div>
+            </div>
           </div>
+        </header>
+
+        <section class="hero-row">
+          <div class="hero-copy">
+            <p class="eyebrow">Products Data List</p>
+            <h1>Marketplace-style university data, arranged like a clean Sellora dashboard.</h1>
+            <p class="hero-text">
+              The visual system follows the referenced Sellora shot closely: pale surfaces, rounded shell,
+              black active navigation, muted olive text, and warm rust accents.
+            </p>
+          </div>
+
+          <div class="hero-stats" id="hero-stats"></div>
         </section>
 
-        <section class="content-grid">
-          <aside class="summary-card">
-            <p class="section-label">Reading guide</p>
-            <h3>What this UI emphasizes</h3>
-            <ul class="summary-list">
-              <li>Ranking is kept visible at card level.</li>
-              <li>Tuition and enrollment are surfaced without opening each detail page.</li>
-              <li>Unknown fields are preserved instead of being guessed.</li>
-            </ul>
-          </aside>
+        <section class="content-row">
+          <section class="table-card">
+            <div class="section-head">
+              <div>
+                <p class="section-label">Data List</p>
+                <h2>University product table</h2>
+              </div>
 
-          <section class="results-panel">
-            <div class="cards" id="cards"></div>
+              <div class="section-actions">
+                <label class="select-pill">
+                  <span>State</span>
+                  <select id="state-filter">
+                    <option value="all">All states</option>
+                  </select>
+                </label>
+
+                <label class="select-pill">
+                  <span>Rank</span>
+                  <select id="rank-filter">
+                    <option value="all">All ranks</option>
+                    <option value="10">Top 10</option>
+                    <option value="25">Top 25</option>
+                    <option value="50">Top 50</option>
+                    <option value="100">Top 100</option>
+                  </select>
+                </label>
+
+                <label class="select-pill">
+                  <span>Sort</span>
+                  <select id="sort-select">
+                    <option value="rank-asc">Best rank</option>
+                    <option value="name-asc">Name A-Z</option>
+                    <option value="tuition-desc">Highest tuition</option>
+                    <option value="tuition-asc">Lowest tuition</option>
+                    <option value="enrollment-desc">Largest enrollment</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
+            <div class="table-meta">
+              <span id="result-meta">Loading data...</span>
+              <a class="ghost-link" href="output/usnews_cs_rankings.csv">Export CSV</a>
+            </div>
+
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>School</th>
+                    <th>Rank</th>
+                    <th>State</th>
+                    <th>Tuition</th>
+                    <th>Enrollment</th>
+                    <th>Band</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+              </table>
+            </div>
+
             <div class="empty-state hidden" id="empty-state">
-              <h3>No schools match this filter.</h3>
-              <p>Try clearing search terms or widening the rank band.</p>
+              <h3>No matching universities</h3>
+              <p>Try clearing the search or widening the filter range.</p>
             </div>
           </section>
+
+          <aside class="sidebar-stack">
+            <section class="detail-card" id="detail-card"></section>
+            <section class="insight-card">
+              <div class="insight-head">
+                <div>
+                  <p class="section-label">Overview</p>
+                  <h3>State coverage</h3>
+                </div>
+              </div>
+              <div class="state-list" id="state-list"></div>
+            </section>
+          </aside>
         </section>
-      </main>
-    </div>
+      </section>
+    </main>
 
     <script src="data/rankings.js"></script>
     <script src="app.js"></script>

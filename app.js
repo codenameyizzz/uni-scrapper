@@ -1,45 +1,35 @@
-const RAW_ROWS = Array.isArray(window.USNEWS_CS_RANKINGS) ? window.USNEWS_CS_RANKINGS : [];
+const rows = Array.isArray(window.USNEWS_CS_RANKINGS)
+  ? window.USNEWS_CS_RANKINGS.map((row, index) => normalizeRow(row, index))
+  : [];
 
 const state = {
   query: "",
   selectedState: "all",
   rankBand: "all",
   sortBy: "rank-asc",
+  selectedId: rows[0]?.id ?? null,
 };
 
 const elements = {
-  topStrip: document.querySelector("#top-strip"),
-  statsGrid: document.querySelector("#stats-grid"),
-  cards: document.querySelector("#cards"),
-  emptyState: document.querySelector("#empty-state"),
-  resultMeta: document.querySelector("#result-meta"),
   searchInput: document.querySelector("#search-input"),
   stateFilter: document.querySelector("#state-filter"),
   rankFilter: document.querySelector("#rank-filter"),
   sortSelect: document.querySelector("#sort-select"),
+  resultMeta: document.querySelector("#result-meta"),
+  heroStats: document.querySelector("#hero-stats"),
+  tableBody: document.querySelector("#table-body"),
+  detailCard: document.querySelector("#detail-card"),
+  stateList: document.querySelector("#state-list"),
+  emptyState: document.querySelector("#empty-state"),
 };
-
-const rows = RAW_ROWS.map((row) => ({
-  rank: Number.parseInt(row.rank, 10) || null,
-  rankLabel: row.rank_label || "Unranked",
-  schoolName: row.school_name || "Unknown school",
-  city: row.city || "",
-  state: row.state || "",
-  tuition: row.tuition || "N/A",
-  enrollment: parseInteger(row.enrollment_full_time),
-  enrollmentLabel: row.enrollment_full_time || "N/A",
-  summary: row.summary || "Details not available in the scraped result.",
-  url: row.url || "#",
-  tuitionValue: parseMoney(row.tuition),
-}));
 
 initialize();
 
 function initialize() {
-  populateStateFilter(rows);
-  renderTopStrip(rows);
-  renderStats(rows);
+  populateStateFilter();
   bindEvents();
+  renderHeroStats();
+  renderStateCoverage();
   render();
 }
 
@@ -63,22 +53,43 @@ function bindEvents() {
     state.sortBy = event.target.value;
     render();
   });
+
+  elements.tableBody.addEventListener("click", (event) => {
+    const row = event.target.closest("[data-id]");
+    if (!row) {
+      return;
+    }
+    state.selectedId = row.dataset.id;
+    render();
+  });
 }
 
 function render() {
   const filtered = applyFilters(rows);
   const sorted = sortRows(filtered, state.sortBy);
 
-  elements.resultMeta.textContent = `${sorted.length} of ${rows.length} schools shown`;
-  elements.cards.innerHTML = sorted.map(renderCard).join("");
-  elements.emptyState.classList.toggle("hidden", sorted.length !== 0);
+  if (!sorted.some((row) => row.id === state.selectedId)) {
+    state.selectedId = sorted[0]?.id ?? null;
+  }
+
+  elements.resultMeta.textContent = `${sorted.length} of ${rows.length} data rows shown`;
+  elements.tableBody.innerHTML = sorted.map(renderTableRow).join("");
+  elements.emptyState.classList.toggle("hidden", sorted.length > 0);
+  renderDetailPanel(sorted.find((row) => row.id === state.selectedId) ?? null);
 }
 
 function applyFilters(items) {
   return items.filter((item) => {
     const matchesQuery =
       !state.query ||
-      [item.schoolName, item.city, item.state, item.tuition, item.rankLabel]
+      [
+        item.schoolName,
+        item.city,
+        item.state,
+        item.rankLabel,
+        item.tuition,
+        item.bandLabel,
+      ]
         .join(" ")
         .toLowerCase()
         .includes(state.query);
@@ -100,117 +111,233 @@ function sortRows(items, sortBy) {
       return left.schoolName.localeCompare(right.schoolName);
     }
 
-    if (sortBy === "enrollment-desc") {
-      return compareNullableNumber(right.enrollment, left.enrollment) || left.schoolName.localeCompare(right.schoolName);
+    if (sortBy === "tuition-desc") {
+      return compareNullableNumber(right.tuitionValue, left.tuitionValue) || compareNullableNumber(left.rank, right.rank);
     }
 
     if (sortBy === "tuition-asc") {
       return compareNullableNumber(left.tuitionValue, right.tuitionValue) || compareNullableNumber(left.rank, right.rank);
     }
 
-    if (sortBy === "tuition-desc") {
-      return compareNullableNumber(right.tuitionValue, left.tuitionValue) || compareNullableNumber(left.rank, right.rank);
+    if (sortBy === "enrollment-desc") {
+      return compareNullableNumber(right.enrollmentValue, left.enrollmentValue) || compareNullableNumber(left.rank, right.rank);
     }
 
     return compareNullableNumber(left.rank, right.rank) || left.schoolName.localeCompare(right.schoolName);
   });
 }
 
-function renderTopStrip(items) {
-  const topSchools = [...items]
-    .filter((item) => item.rank !== null)
-    .sort((a, b) => a.rank - b.rank || a.schoolName.localeCompare(b.schoolName))
-    .slice(0, 5);
-
-  elements.topStrip.innerHTML = topSchools
-    .map(
-      (item) => `
-        <span class="top-chip">
-          <strong>#${item.rank}</strong>
-          <span>${escapeHtml(item.schoolName)}</span>
-        </span>
-      `
-    )
-    .join("");
-}
-
-function renderStats(items) {
-  const ranked = items.filter((item) => item.rank !== null);
-  const knownTuition = items.filter((item) => item.tuitionValue !== null);
-  const uniqueStates = new Set(items.map((item) => item.state).filter(Boolean));
+function renderHeroStats() {
+  const knownTuition = rows.filter((row) => row.tuitionValue !== null);
+  const topTen = rows.filter((row) => row.rank !== null && row.rank <= 10).length;
   const averageTuition = knownTuition.length
-    ? Math.round(knownTuition.reduce((sum, item) => sum + item.tuitionValue, 0) / knownTuition.length)
+    ? Math.round(knownTuition.reduce((sum, row) => sum + row.tuitionValue, 0) / knownTuition.length)
     : null;
 
   const cards = [
-    { label: "Programs", value: items.length },
-    { label: "States represented", value: uniqueStates.size },
-    { label: "Best visible rank", value: ranked.length ? `#${ranked[0].rank}` : "N/A" },
-    { label: "Avg. known tuition", value: averageTuition !== null ? formatMoney(averageTuition) : "N/A" },
+    {
+      label: "Visible programs",
+      value: String(rows.length),
+      subtext: "Scraped from the ranking list",
+      featured: true,
+    },
+    {
+      label: "Top 10 schools",
+      value: String(topTen),
+      subtext: "Programs in the leading band",
+    },
+    {
+      label: "States covered",
+      value: String(new Set(rows.map((row) => row.state).filter(Boolean)).size),
+      subtext: "Unique locations represented",
+    },
+    {
+      label: "Average tuition",
+      value: averageTuition !== null ? formatMoney(averageTuition) : "N/A",
+      subtext: "Based on rows with known values",
+    },
   ];
 
-  elements.statsGrid.innerHTML = cards
+  elements.heroStats.innerHTML = cards
     .map(
       (card) => `
-        <article class="stat-card">
-          <span class="stat-label">${escapeHtml(card.label)}</span>
-          <span class="stat-value">${escapeHtml(String(card.value))}</span>
+        <article class="metric-card${card.featured ? " featured" : ""}">
+          <span class="metric-kicker">${escapeHtml(card.label)}</span>
+          <strong class="metric-value">${escapeHtml(card.value)}</strong>
+          <span class="metric-subtext">${escapeHtml(card.subtext)}</span>
         </article>
       `
     )
     .join("");
 }
 
-function populateStateFilter(items) {
-  const states = [...new Set(items.map((item) => item.state).filter(Boolean))].sort();
-  const options = states
-    .map((value) => `<option value="${escapeHtml(value)}">${escapeHtml(value)}</option>`)
-    .join("");
+function renderStateCoverage() {
+  const counts = new Map();
+  rows.forEach((row) => {
+    if (!row.state) {
+      return;
+    }
+    counts.set(row.state, (counts.get(row.state) ?? 0) + 1);
+  });
 
-  elements.stateFilter.insertAdjacentHTML("beforeend", options);
+  const topStates = [...counts.entries()]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .slice(0, 6);
+
+  const max = topStates[0]?.[1] ?? 1;
+
+  elements.stateList.innerHTML = topStates
+    .map(
+      ([code, count]) => `
+        <div class="state-item">
+          <span class="state-code">${escapeHtml(code)}</span>
+          <div class="state-bar"><span style="width:${(count / max) * 100}%"></span></div>
+          <span class="state-value">${count}</span>
+        </div>
+      `
+    )
+    .join("");
 }
 
-function renderCard(item) {
-  const location = [item.city, item.state].filter(Boolean).join(", ") || "Location not available";
-  const summary = item.summary || "Details not available in the scraped result.";
+function renderTableRow(item) {
+  const location = item.city && item.state ? `${item.city}, ${item.state}` : item.state || item.city || "Location unknown";
+  const tuitionMain = item.tuition === "N/A" ? "Not disclosed" : item.tuition;
+  const isSelected = item.id === state.selectedId;
 
   return `
-    <article class="card">
-      <div class="card-top">
-        <div>
-          <h3>${escapeHtml(item.schoolName)}</h3>
-          <p class="rank-label">${escapeHtml(item.rankLabel)}</p>
+    <tr data-id="${escapeAttribute(item.id)}" class="${isSelected ? "is-selected" : ""}">
+      <td>
+        <div class="school-cell">
+          <span class="school-mark">${escapeHtml(item.code)}</span>
+          <div class="school-text">
+            <strong>${escapeHtml(item.schoolName)}</strong>
+            <span>${escapeHtml(location)}</span>
+          </div>
         </div>
-        <div class="rank-badge">${item.rank !== null ? `#${item.rank}` : "N/A"}</div>
-      </div>
-
-      <p class="location">${escapeHtml(location)}</p>
-
-      <div class="metric-row">
-        <div class="metric">
-          <span class="metric-label">Tuition</span>
-          <span class="metric-value">${escapeHtml(item.tuition || "N/A")}</span>
-        </div>
-        <div class="metric">
-          <span class="metric-label">Enrollment</span>
-          <span class="metric-value">${escapeHtml(item.enrollmentLabel || "N/A")}</span>
-        </div>
-      </div>
-
-      <p class="summary">${escapeHtml(summary)}</p>
-
-      <a class="card-link" href="${escapeAttribute(item.url)}" target="_blank" rel="noreferrer">
-        Open source page
-      </a>
-    </article>
+      </td>
+      <td><span class="rank-pill">${item.rank !== null ? `#${item.rank}` : "N/A"}</span></td>
+      <td><span class="value-main">${escapeHtml(item.state || "N/A")}</span></td>
+      <td>
+        <span class="value-main">${escapeHtml(tuitionMain)}</span>
+      </td>
+      <td>
+        <span class="value-main">${escapeHtml(item.enrollmentLabel)}</span>
+      </td>
+      <td><span class="band-pill ${escapeHtml(item.bandClass)}">${escapeHtml(item.bandLabel)}</span></td>
+      <td><a class="open-link" href="${escapeAttribute(item.url)}" target="_blank" rel="noreferrer">Open</a></td>
+    </tr>
   `;
 }
 
-function parseInteger(value) {
+function renderDetailPanel(item) {
+  if (!item) {
+    elements.detailCard.innerHTML = `
+      <p class="section-label">Selection</p>
+      <h3>No row selected</h3>
+      <p class="detail-summary">Adjust the filters or choose a row from the table.</p>
+    `;
+    return;
+  }
+
+  const location = item.city && item.state ? `${item.city}, ${item.state}` : item.state || item.city || "Location unknown";
+
+  elements.detailCard.innerHTML = `
+    <p class="section-label">Selected item</p>
+    <div class="detail-top">
+      <div>
+        <h3>${escapeHtml(item.schoolName)}</h3>
+        <p class="detail-location">${escapeHtml(location)}</p>
+      </div>
+      <div class="detail-badge">${item.rank !== null ? `#${item.rank}` : "N/A"}</div>
+    </div>
+
+    <p class="detail-summary">${escapeHtml(item.summary || "No summary available for this row.")}</p>
+
+    <div class="detail-grid">
+      <div class="detail-metric">
+        <span>Rank label</span>
+        <strong>${escapeHtml(item.rankLabel)}</strong>
+      </div>
+      <div class="detail-metric">
+        <span>Tuition</span>
+        <strong>${escapeHtml(item.tuition)}</strong>
+      </div>
+      <div class="detail-metric">
+        <span>Enrollment</span>
+        <strong>${escapeHtml(item.enrollmentLabel)}</strong>
+      </div>
+      <div class="detail-metric">
+        <span>Band</span>
+        <strong>${escapeHtml(item.bandLabel)}</strong>
+      </div>
+    </div>
+
+    <a class="detail-link" href="${escapeAttribute(item.url)}" target="_blank" rel="noreferrer">Visit source page</a>
+  `;
+}
+
+function populateStateFilter() {
+  const states = [...new Set(rows.map((row) => row.state).filter(Boolean))].sort();
+  elements.stateFilter.insertAdjacentHTML(
+    "beforeend",
+    states.map((code) => `<option value="${escapeAttribute(code)}">${escapeHtml(code)}</option>`).join("")
+  );
+}
+
+function normalizeRow(row, index) {
+  const rank = parseNullableInteger(row.rank);
+  const state = (row.state || "").trim();
+  const city = (row.city || "").trim();
+
+  return {
+    id: `row-${index}`,
+    code: createCode(row.school_name || "UN"),
+    rank,
+    rankLabel: row.rank_label || "Unranked",
+    schoolName: row.school_name || "Unknown university",
+    city,
+    state,
+    tuition: row.tuition || "N/A",
+    tuitionValue: parseMoney(row.tuition),
+    enrollmentLabel: row.enrollment_full_time || "N/A",
+    enrollmentValue: parseNullableInteger(row.enrollment_full_time),
+    summary: row.summary || "",
+    url: row.url || "#",
+    ...getBand(rank),
+  };
+}
+
+function getBand(rank) {
+  if (rank !== null && rank <= 10) {
+    return { bandLabel: "Elite", bandClass: "band-elite" };
+  }
+  if (rank !== null && rank <= 25) {
+    return { bandLabel: "Strong", bandClass: "band-strong" };
+  }
+  if (rank !== null && rank <= 50) {
+    return { bandLabel: "Solid", bandClass: "band-solid" };
+  }
+  return { bandLabel: "Wide", bandClass: "band-wide" };
+}
+
+function createCode(name) {
+  const parts = String(name)
+    .replace(/[^A-Za-z\s-]/g, "")
+    .split(/[\s-]+/)
+    .filter(Boolean)
+    .slice(0, 2);
+
+  if (parts.length === 0) {
+    return "UN";
+  }
+
+  return parts.map((part) => part[0].toUpperCase()).join("");
+}
+
+function parseNullableInteger(value) {
   if (!value || value === "N/A") {
     return null;
   }
-
   const normalized = String(value).replace(/[^\d]/g, "");
   return normalized ? Number.parseInt(normalized, 10) : null;
 }
@@ -219,7 +346,6 @@ function parseMoney(value) {
   if (!value || value === "N/A") {
     return null;
   }
-
   const match = String(value).match(/\$([\d,]+)/);
   return match ? Number.parseInt(match[1].replace(/,/g, ""), 10) : null;
 }
