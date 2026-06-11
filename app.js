@@ -336,7 +336,7 @@ function renderLocations(items) {
 
   elements.stateGrid.innerHTML =
     stateStats.length > 0
-      ? stateStats.slice(0, 12).map(renderStateCard).join("")
+      ? stateStats.slice(0, 10).map(renderStateCard).join("")
       : `
         <article class="info-item">
           <strong>No locations match the current search.</strong>

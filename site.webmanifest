@@ -1,0 +1,16 @@
+{
+  "name": "CS Rankings Dashboard",
+  "short_name": "CS Rankings",
+  "description": "Searchable dashboard for 2026 computer science graduate school rankings.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f4f5f6",
+  "theme_color": "#f4f5f6",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
