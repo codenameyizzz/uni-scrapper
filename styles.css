@@ -466,6 +466,44 @@ body {
   border-radius: 18px;
 }
 
+.about-card {
+  margin-top: 18px;
+}
+
+.about-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.about-item {
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fcfcfc 0%, #f8f8f6 100%);
+}
+
+.about-item strong,
+.about-item span {
+  display: block;
+}
+
+.about-item strong {
+  font-size: 1rem;
+}
+
+.about-item span {
+  margin-top: 8px;
+  color: var(--muted);
+  line-height: 1.72;
+  font-size: 0.92rem;
+}
+
+.about-links {
+  margin-top: 14px;
+}
+
 .info-item strong,
 .info-item span {
   display: block;
@@ -1024,6 +1062,7 @@ body {
 
   .hero-stats,
   .featured-grid,
+  .about-grid,
   .state-grid,
   .tuition-grid {
     grid-template-columns: 1fr;
@@ -1187,7 +1226,8 @@ body {
   .state-card,
   .list-item,
   .detail-metric,
-  .info-item {
+  .info-item,
+  .about-item {
     border-radius: 16px;
   }
 
@@ -1209,6 +1249,7 @@ body {
 
   .featured-summary,
   .info-item span,
+  .about-item span,
   .state-card p,
   .detail-summary {
     line-height: 1.58;
@@ -1493,6 +1534,7 @@ body {
   .hero-text,
   .featured-summary,
   .info-item span,
+  .about-item span,
   .state-card p,
   .detail-summary,
   .list-item-meta,
@@ -1521,6 +1563,7 @@ body {
 
   .metric-card,
   .info-item,
+  .about-item,
   .list-item,
   .state-card,
   .detail-metric,

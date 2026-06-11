@@ -3,21 +3,17 @@ const SOURCE_URL =
 const METHODOLOGY_URL =
   "https://www.usnews.com/education/best-graduate-schools/articles/science-schools-methodology";
 const DATASET_UPDATED_AT = "2026-06-11T12:01:33+07:00";
+const DEFAULT_PAGE_SIZE = 20;
+const DEFAULT_SORT = "rank-asc";
+const ALLOWED_PAGE_SIZES = [10, 20, 50, 100];
+const ALLOWED_RANK_BANDS = ["all", "10", "25", "50", "100"];
+const ALLOWED_SORTS = ["rank-asc", "name-asc", "tuition-desc", "tuition-asc", "enrollment-desc"];
 
 const rows = Array.isArray(window.USNEWS_CS_RANKINGS)
   ? window.USNEWS_CS_RANKINGS.map((row, index) => normalizeRow(row, index))
   : [];
 
-const appState = {
-  activeView: getInitialView(),
-  query: "",
-  selectedState: "all",
-  rankBand: "all",
-  sortBy: "rank-asc",
-  pageSize: 20,
-  currentPage: 1,
-  selectedId: rows[0]?.id ?? null,
-};
+const appState = getInitialAppState();
 
 const elements = {
   navButtons: [...document.querySelectorAll("[data-view]")],
@@ -37,6 +33,7 @@ const elements = {
   lastUpdatedIndicator: document.querySelector("#last-updated-indicator"),
   featuredGrid: document.querySelector("#featured-grid"),
   overviewSummary: document.querySelector("#overview-summary"),
+  aboutDataGrid: document.querySelector("#about-data-grid"),
   tableBody: document.querySelector("#table-body"),
   detailCard: document.querySelector("#detail-card"),
   emptyState: document.querySelector("#empty-state"),
@@ -52,6 +49,7 @@ initialize();
 
 function initialize() {
   populateStateFilter();
+  syncControlValues({ syncQuery: true });
   bindEvents();
   renderLastUpdated();
   renderHeroStats();
@@ -72,6 +70,12 @@ function bindEvents() {
       setActiveView(nextView, false);
       renderViewState();
     }
+  });
+
+  window.addEventListener("popstate", () => {
+    hydrateState(parseStateFromUrl());
+    syncControlValues({ syncQuery: true });
+    renderAll();
   });
 
   elements.searchInput.addEventListener("input", (event) => {
@@ -181,6 +185,7 @@ function renderAll() {
 
   renderViewState();
   renderOverview(searchFiltered);
+  renderAboutData();
   renderLocations(searchFiltered);
   renderTuitions(searchFiltered);
   renderMethodology(searchFiltered);
@@ -203,10 +208,7 @@ function setActiveView(view, updateHash = true) {
   renderViewState();
 
   if (updateHash) {
-    const nextHash = `#${nextView}`;
-    if (window.location.hash !== nextHash) {
-      window.location.hash = nextHash;
-    }
+    updateUrlState();
   }
 }
 
@@ -316,6 +318,57 @@ function renderOverview(items) {
     .join("");
 }
 
+function renderAboutData() {
+  const officialCount = rows.filter((row) => row.officialUrl).length;
+  const imageCount = rows.filter((row) => row.imageUrl).length;
+  const knownTuitionCount = rows.filter((row) => row.tuitionValue !== null).length;
+  const cards = [
+    {
+      title: "Primary source",
+      body: "Ranking rows, summaries, tuition strings, enrollment, and profile links come from the public U.S. News computer science graduate schools ranking page.",
+      links: [
+        { href: SOURCE_URL, label: "Open ranking page" },
+        { href: METHODOLOGY_URL, label: "Open methodology article" },
+      ],
+    },
+    {
+      title: "Local dataset",
+      body: `${rows.length} extracted rows are bundled into this dashboard for faster browsing and static deployment. The exported CSV remains available for direct inspection.`,
+      links: [{ href: "output/usnews_cs_rankings.csv", label: "Open local CSV" }],
+    },
+    {
+      title: "Enrichment layer",
+      body: `${officialCount} rows include official university homepage links and ${imageCount} rows include an image field carried into the interface for quicker navigation.`,
+      links: [],
+    },
+    {
+      title: "Caveats",
+      body: `${knownTuitionCount} rows expose a tuition amount. Missing values stay as N/A, tied ranks are preserved, and tuition comparisons use the first amount shown in each source string.`,
+      links: [],
+    },
+  ];
+
+  elements.aboutDataGrid.innerHTML = cards
+    .map(
+      (card) => `
+        <article class="about-item">
+          <strong>${escapeHtml(card.title)}</strong>
+          <span>${escapeHtml(card.body)}</span>
+          ${
+            card.links.length > 0
+              ? `
+                <div class="button-row about-links">
+                  ${card.links.map((link) => renderLinkButton(link.href, link.label, "mini-button")).join("")}
+                </div>
+              `
+              : ""
+          }
+        </article>
+      `
+    )
+    .join("");
+}
+
 function renderUniversityTable(searchFiltered) {
   const filtered = applyUniversityFilters(searchFiltered);
   const sorted = sortRows(filtered, appState.sortBy);
@@ -350,6 +403,7 @@ function renderUniversityTable(searchFiltered) {
   elements.nextPageButton.disabled = appState.currentPage >= totalPages;
   renderPageNumbers(totalPages);
   renderDetailPanel(selectedItem);
+  updateUrlState();
 }
 
 function renderActiveFilters() {
@@ -373,7 +427,7 @@ function renderActiveFilters() {
           (filter) => `
             <button class="filter-chip" type="button" data-clear-filter="${escapeAttribute(filter.key)}">
               <span>${escapeHtml(filter.label)}</span>
-              <span class="filter-chip-close" aria-hidden="true">×</span>
+              <span class="filter-chip-close" aria-hidden="true">x</span>
             </button>
           `
         )
@@ -713,8 +767,12 @@ function getActiveFilters() {
     filters.push({ key: "rank", label: `Rank: Top ${appState.rankBand}` });
   }
 
-  if (appState.sortBy !== "rank-asc") {
+  if (appState.sortBy !== DEFAULT_SORT) {
     filters.push({ key: "sort", label: `Sort: ${getSortLabel(appState.sortBy)}` });
+  }
+
+  if (appState.pageSize !== DEFAULT_PAGE_SIZE) {
+    filters.push({ key: "rows", label: `Rows: ${appState.pageSize}` });
   }
 
   return filters;
@@ -727,7 +785,8 @@ function clearFilter(filterKey) {
     appState.query = "";
     appState.selectedState = "all";
     appState.rankBand = "all";
-    appState.sortBy = "rank-asc";
+    appState.sortBy = DEFAULT_SORT;
+    appState.pageSize = DEFAULT_PAGE_SIZE;
   }
 
   if (filterKey === "query") {
@@ -743,7 +802,11 @@ function clearFilter(filterKey) {
   }
 
   if (filterKey === "sort") {
-    appState.sortBy = "rank-asc";
+    appState.sortBy = DEFAULT_SORT;
+  }
+
+  if (filterKey === "rows") {
+    appState.pageSize = DEFAULT_PAGE_SIZE;
   }
 
   appState.currentPage = 1;
@@ -759,6 +822,7 @@ function syncControlValues({ syncQuery = false } = {}) {
   elements.stateFilter.value = appState.selectedState;
   elements.rankFilter.value = appState.rankBand;
   elements.sortSelect.value = appState.sortBy;
+  elements.pageSizeSelect.value = String(appState.pageSize);
 }
 
 function getSortLabel(sortBy) {
@@ -945,6 +1009,88 @@ function getInitialView() {
 
 function isKnownView(value) {
   return ["overview", "universities", "locations", "tuitions", "methodology"].includes(value);
+}
+
+function getInitialAppState() {
+  const initial = parseStateFromUrl();
+
+  return {
+    activeView: initial.activeView,
+    query: initial.query,
+    selectedState: initial.selectedState,
+    rankBand: initial.rankBand,
+    sortBy: initial.sortBy,
+    pageSize: initial.pageSize,
+    currentPage: initial.currentPage,
+    selectedId: rows[0]?.id ?? null,
+  };
+}
+
+function parseStateFromUrl() {
+  const params = new URLSearchParams(window.location.search);
+  const rankBand = params.get("rank") || "all";
+  const sortBy = params.get("sort") || DEFAULT_SORT;
+  const selectedState = params.get("state") || "all";
+  const pageSize = Number.parseInt(params.get("rows") || "", 10);
+  const currentPage = Number.parseInt(params.get("page") || "", 10);
+  const knownStates = new Set(rows.map((row) => row.state).filter(Boolean));
+
+  return {
+    activeView: getInitialView(),
+    query: (params.get("q") || "").trim().toLowerCase(),
+    selectedState: selectedState === "all" || knownStates.has(selectedState) ? selectedState : "all",
+    rankBand: ALLOWED_RANK_BANDS.includes(rankBand) ? rankBand : "all",
+    sortBy: ALLOWED_SORTS.includes(sortBy) ? sortBy : DEFAULT_SORT,
+    pageSize: ALLOWED_PAGE_SIZES.includes(pageSize) ? pageSize : DEFAULT_PAGE_SIZE,
+    currentPage: Number.isInteger(currentPage) && currentPage > 0 ? currentPage : 1,
+  };
+}
+
+function hydrateState(nextState) {
+  appState.activeView = nextState.activeView;
+  appState.query = nextState.query;
+  appState.selectedState = nextState.selectedState;
+  appState.rankBand = nextState.rankBand;
+  appState.sortBy = nextState.sortBy;
+  appState.pageSize = nextState.pageSize;
+  appState.currentPage = nextState.currentPage;
+}
+
+function updateUrlState() {
+  const params = new URLSearchParams();
+
+  if (appState.query) {
+    params.set("q", appState.query);
+  }
+
+  if (appState.selectedState !== "all") {
+    params.set("state", appState.selectedState);
+  }
+
+  if (appState.rankBand !== "all") {
+    params.set("rank", appState.rankBand);
+  }
+
+  if (appState.sortBy !== DEFAULT_SORT) {
+    params.set("sort", appState.sortBy);
+  }
+
+  if (appState.pageSize !== DEFAULT_PAGE_SIZE) {
+    params.set("rows", String(appState.pageSize));
+  }
+
+  if (appState.currentPage > 1) {
+    params.set("page", String(appState.currentPage));
+  }
+
+  const nextSearch = params.toString();
+  const nextHash = `#${appState.activeView}`;
+  const nextUrl = `${window.location.pathname}${nextSearch ? `?${nextSearch}` : ""}${nextHash}`;
+  const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+
+  if (currentUrl !== nextUrl) {
+    window.history.replaceState({}, "", nextUrl);
+  }
 }
 
 function normalizeUrl(value) {
