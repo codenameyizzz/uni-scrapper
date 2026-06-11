@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sellora Style University Data List</title>
+    <title>Computer Science University Rankings</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
@@ -11,145 +11,244 @@
 
     <main class="app-shell">
       <section class="dashboard-shell">
-        <header class="topbar">
-          <div class="brand-pill">
-            <div class="brand-mark" aria-hidden="true">
-              <span></span>
-              <span></span>
-            </div>
-            <span class="brand-name">Sellora</span>
-          </div>
-
-          <nav class="main-nav" aria-label="Primary">
-            <button class="nav-pill" type="button">Dashboard</button>
-            <button class="nav-pill nav-pill-active" type="button">Products</button>
-            <button class="nav-pill" type="button">Orders</button>
-            <button class="nav-pill" type="button">Marketing</button>
-            <button class="nav-pill" type="button">Analytics</button>
-          </nav>
-
-          <div class="topbar-tools">
-            <label class="search-pill">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M10.5 4a6.5 6.5 0 1 0 4.03 11.6l4.44 4.44 1.06-1.06-4.44-4.44A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
-                />
-              </svg>
-              <input id="search-input" type="search" placeholder="Search schools..." />
-            </label>
-
-            <button class="icon-pill" type="button" aria-label="Notifications">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12 3a5 5 0 0 0-5 5v2.27c0 .53-.21 1.04-.59 1.41L5 13.09V15h14v-1.91l-1.41-1.41a2 2 0 0 1-.59-1.41V8a5 5 0 0 0-5-5Zm0 18a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 21Z"
-                />
-              </svg>
-            </button>
-
-            <div class="avatar-pill">
-              <div class="avatar-dot"></div>
-              <div>
-                <strong>Marketplace Admin</strong>
-                <span>Data operator</span>
+        <div class="sticky-header">
+          <header class="topbar">
+            <div class="brand-pill">
+              <div class="brand-mark" aria-hidden="true">
+                <span></span>
+                <span></span>
               </div>
+              <span class="brand-name">CS Rankings</span>
             </div>
-          </div>
-        </header>
 
-        <section class="hero-row">
-          <div class="hero-copy">
-            <p class="eyebrow">Products Data List</p>
-            <h1>Marketplace-style university data, arranged like a clean Sellora dashboard.</h1>
-            <p class="hero-text">
-              The visual system follows the referenced Sellora shot closely: pale surfaces, rounded shell,
-              black active navigation, muted olive text, and warm rust accents.
-            </p>
-          </div>
+            <nav class="main-nav" aria-label="Primary">
+              <button class="nav-pill nav-pill-active" type="button" data-view="overview">Overview</button>
+              <button class="nav-pill" type="button" data-view="universities">Universities</button>
+              <button class="nav-pill" type="button" data-view="locations">Locations</button>
+              <button class="nav-pill" type="button" data-view="tuitions">Tuitions</button>
+              <button class="nav-pill" type="button" data-view="methodology">Methodology</button>
+            </nav>
 
-          <div class="hero-stats" id="hero-stats"></div>
-        </section>
+            <div class="topbar-tools">
+              <label class="search-pill">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M10.5 4a6.5 6.5 0 1 0 4.03 11.6l4.44 4.44 1.06-1.06-4.44-4.44A6.5 6.5 0 0 0 10.5 4Zm0 1.5a5 5 0 1 1 0 10 5 5 0 0 1 0-10Z"
+                  />
+                </svg>
+                <input id="search-input" type="search" placeholder="Search university or location..." />
+              </label>
 
-        <section class="content-row">
-          <section class="table-card">
-            <div class="section-head">
-              <div>
-                <p class="section-label">Data List</p>
-                <h2>University product table</h2>
+              <a
+                class="source-pill"
+                href="https://www.usnews.com/best-graduate-schools/top-computer-science-schools/computer-science-rankings"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Source
+              </a>
+            </div>
+          </header>
+        </div>
+
+        <div class="views">
+          <section class="view-panel view-panel-active" id="view-overview">
+            <section class="hero-row">
+              <div class="hero-copy">
+                <p class="eyebrow">U.S. News Graduate Schools</p>
+                <h1>2026 Best Computer Science Schools, organized into a calmer dashboard.</h1>
+                <p class="hero-text">
+                  Explore ranked computer science graduate schools, compare public details, and jump from the ranking list
+                  to both the U.S. News profile and the official university site.
+                </p>
               </div>
 
-              <div class="section-actions">
-                <label class="select-pill">
-                  <span>State</span>
-                  <select id="state-filter">
-                    <option value="all">All states</option>
-                  </select>
-                </label>
+              <div class="hero-stats" id="hero-stats"></div>
+            </section>
 
-                <label class="select-pill">
-                  <span>Rank</span>
-                  <select id="rank-filter">
-                    <option value="all">All ranks</option>
-                    <option value="10">Top 10</option>
-                    <option value="25">Top 25</option>
-                    <option value="50">Top 50</option>
-                    <option value="100">Top 100</option>
-                  </select>
-                </label>
+            <section class="overview-grid">
+              <section class="overview-card wide-card">
+                <div class="section-head compact-head">
+                  <div>
+                    <p class="section-label">Overview</p>
+                    <h2>Featured universities</h2>
+                  </div>
+                </div>
+                <div class="featured-grid" id="featured-grid"></div>
+              </section>
 
-                <label class="select-pill">
-                  <span>Sort</span>
-                  <select id="sort-select">
-                    <option value="rank-asc">Best rank</option>
-                    <option value="name-asc">Name A-Z</option>
-                    <option value="tuition-desc">Highest tuition</option>
-                    <option value="tuition-asc">Lowest tuition</option>
-                    <option value="enrollment-desc">Largest enrollment</option>
-                  </select>
-                </label>
-              </div>
-            </div>
-
-            <div class="table-meta">
-              <span id="result-meta">Loading data...</span>
-              <a class="ghost-link" href="output/usnews_cs_rankings.csv">Export CSV</a>
-            </div>
-
-            <div class="table-wrap">
-              <table class="data-table">
-                <thead>
-                  <tr>
-                    <th>School</th>
-                    <th>Rank</th>
-                    <th>State</th>
-                    <th>Tuition</th>
-                    <th>Enrollment</th>
-                    <th>Band</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody id="table-body"></tbody>
-              </table>
-            </div>
-
-            <div class="empty-state hidden" id="empty-state">
-              <h3>No matching universities</h3>
-              <p>Try clearing the search or widening the filter range.</p>
-            </div>
+              <section class="overview-card">
+                <p class="section-label">Summary</p>
+                <h3>What this ranking page contains</h3>
+                <div class="info-stack" id="overview-summary"></div>
+              </section>
+            </section>
           </section>
 
-          <aside class="sidebar-stack">
-            <section class="detail-card" id="detail-card"></section>
-            <section class="insight-card">
-              <div class="insight-head">
-                <div>
-                  <p class="section-label">Overview</p>
-                  <h3>State coverage</h3>
+          <section class="view-panel" id="view-universities">
+            <section class="content-row">
+              <section class="table-card">
+                <div class="section-head">
+                  <div>
+                    <p class="section-label">Ranked Universities</p>
+                    <h2>Computer science school list</h2>
+                  </div>
+
+                  <div class="section-actions">
+                    <label class="select-pill">
+                      <span>State</span>
+                      <select id="state-filter">
+                        <option value="all">All states</option>
+                      </select>
+                    </label>
+
+                    <label class="select-pill">
+                      <span>Rank</span>
+                      <select id="rank-filter">
+                        <option value="all">All ranks</option>
+                        <option value="10">Top 10</option>
+                        <option value="25">Top 25</option>
+                        <option value="50">Top 50</option>
+                        <option value="100">Top 100</option>
+                      </select>
+                    </label>
+
+                    <label class="select-pill">
+                      <span>Sort</span>
+                      <select id="sort-select">
+                        <option value="rank-asc">Best rank</option>
+                        <option value="name-asc">Name A-Z</option>
+                        <option value="tuition-desc">Highest tuition</option>
+                        <option value="tuition-asc">Lowest tuition</option>
+                        <option value="enrollment-desc">Largest enrollment</option>
+                      </select>
+                    </label>
+
+                    <label class="select-pill">
+                      <span>Rows</span>
+                      <select id="page-size-select">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                      </select>
+                    </label>
+                  </div>
                 </div>
-              </div>
-              <div class="state-list" id="state-list"></div>
+
+                <div class="table-meta">
+                  <span id="result-meta">Loading data...</span>
+                  <a class="ghost-link" href="output/usnews_cs_rankings.csv">Export CSV</a>
+                </div>
+
+                <div class="table-wrap">
+                  <table class="data-table">
+                    <thead>
+                      <tr>
+                        <th>University</th>
+                        <th>Rank</th>
+                        <th>Location</th>
+                        <th>Tuition</th>
+                        <th>Enrollment</th>
+                        <th>Links</th>
+                      </tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                  </table>
+                </div>
+
+                <div class="pagination-bar">
+                  <button class="pager-button" id="prev-page-button" type="button">Previous</button>
+                  <div class="page-numbers" id="page-numbers"></div>
+                  <span class="page-indicator" id="page-indicator">Page 1 of 1</span>
+                  <button class="pager-button" id="next-page-button" type="button">Next</button>
+                </div>
+
+                <div class="empty-state hidden" id="empty-state">
+                  <h3>No matching universities</h3>
+                  <p>Try clearing the search or widening the filter range.</p>
+                </div>
+              </section>
+
+              <aside class="sidebar-stack">
+                <section class="detail-card" id="detail-card"></section>
+              </aside>
             </section>
-          </aside>
-        </section>
+          </section>
+
+          <section class="view-panel" id="view-locations">
+            <section class="overview-grid">
+              <section class="overview-card wide-card">
+                <div class="section-head compact-head">
+                  <div>
+                    <p class="section-label">Locations</p>
+                    <h2>Where ranked schools are concentrated</h2>
+                  </div>
+                </div>
+                <div class="state-grid" id="state-grid"></div>
+              </section>
+
+              <section class="overview-card">
+                <p class="section-label">Coverage</p>
+                <h3>Top states in this ranking</h3>
+                <div class="state-list" id="state-list"></div>
+              </section>
+            </section>
+          </section>
+
+          <section class="view-panel" id="view-tuitions">
+            <section class="overview-grid">
+              <section class="overview-card wide-card">
+                <div class="section-head compact-head">
+                  <div>
+                    <p class="section-label">Tuitions</p>
+                    <h2>Tuition comparison</h2>
+                  </div>
+                </div>
+                <div class="tuition-grid">
+                  <div class="tuition-column">
+                    <h3>Highest known tuition</h3>
+                    <div class="list-stack" id="highest-tuition-list"></div>
+                  </div>
+                  <div class="tuition-column">
+                    <h3>Lowest known tuition</h3>
+                    <div class="list-stack" id="lowest-tuition-list"></div>
+                  </div>
+                </div>
+              </section>
+
+              <section class="overview-card">
+                <p class="section-label">Notes</p>
+                <h3>How to read tuition fields</h3>
+                <div class="info-stack" id="tuition-summary"></div>
+              </section>
+            </section>
+          </section>
+
+          <section class="view-panel" id="view-methodology">
+            <section class="overview-grid">
+              <section class="overview-card wide-card">
+                <div class="section-head compact-head">
+                  <div>
+                    <p class="section-label">Methodology</p>
+                    <h2>How this local dashboard should be interpreted</h2>
+                  </div>
+                </div>
+                <div class="info-stack" id="methodology-summary"></div>
+              </section>
+
+              <section class="overview-card">
+                <p class="section-label">Source links</p>
+                <h3>Primary references</h3>
+                <div class="link-stack">
+                  <a class="resource-link" href="https://www.usnews.com/best-graduate-schools/top-computer-science-schools/computer-science-rankings" target="_blank" rel="noreferrer">U.S. News rankings page</a>
+                  <a class="resource-link" href="https://www.usnews.com/education/best-graduate-schools/articles/science-schools-methodology" target="_blank" rel="noreferrer">U.S. News methodology article</a>
+                  <a class="resource-link" href="output/usnews_cs_rankings.csv">Local extracted CSV</a>
+                </div>
+              </section>
+            </section>
+          </section>
+        </div>
       </section>
     </main>
 
