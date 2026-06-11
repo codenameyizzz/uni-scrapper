@@ -501,7 +501,7 @@ function renderTableRow(item) {
 
   return `
     <tr data-id="${escapeAttribute(item.id)}" class="${isSelected ? "is-selected" : ""}">
-      <td>
+      <td data-label="University">
         <div class="school-cell">
           <span class="school-mark">${escapeHtml(item.code)}</span>
           <div class="school-text">
@@ -510,11 +510,11 @@ function renderTableRow(item) {
           </div>
         </div>
       </td>
-      <td><span class="rank-pill">${item.rank !== null ? `#${item.rank}` : "N/A"}</span></td>
-      <td><span class="value-main">${escapeHtml(item.locationLabel)}</span></td>
-      <td><span class="value-main">${escapeHtml(tuitionMain)}</span></td>
-      <td><span class="value-main">${escapeHtml(item.enrollmentLabel)}</span></td>
-      <td>
+      <td data-label="Rank"><span class="rank-pill">${item.rank !== null ? `#${item.rank}` : "N/A"}</span></td>
+      <td data-label="Location"><span class="value-main">${escapeHtml(item.locationLabel)}</span></td>
+      <td data-label="Tuition"><span class="value-main">${escapeHtml(tuitionMain)}</span></td>
+      <td data-label="Enrollment"><span class="value-main">${escapeHtml(item.enrollmentLabel)}</span></td>
+      <td data-label="Links">
         <div class="link-pair">
           ${renderLinkButton(item.officialUrl, "Official", "open-link")}
           ${renderLinkButton(item.url, "Profile", "ghost-link")}
