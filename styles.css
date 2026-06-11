@@ -581,11 +581,76 @@ body {
   font-size: 0.9rem;
 }
 
+.active-filters {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: linear-gradient(180deg, #fcfcfc 0%, #f8f8f6 100%);
+}
+
+.active-filters-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.active-filters-title {
+  color: var(--muted-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.filter-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.filter-chip,
+.clear-all-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.filter-chip {
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 14px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.filter-chip-close {
+  color: var(--muted-soft);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.clear-all-button {
+  min-height: 34px;
+  padding: 0 12px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .table-wrap {
   margin-top: 14px;
   border: 1px solid var(--line);
   border-radius: 24px;
-  overflow: hidden;
+  overflow: auto;
   background: #fcfcfc;
 }
 
@@ -595,8 +660,13 @@ body {
 }
 
 .data-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
   padding: 16px 18px;
   border-bottom: 1px solid var(--line);
+  background: rgba(252, 252, 252, 0.95);
+  backdrop-filter: blur(10px);
   color: var(--muted-soft);
   font-size: 0.78rem;
   font-weight: 700;
@@ -1193,6 +1263,26 @@ body {
     gap: 10px;
     font-size: 0.84rem;
   }
+
+  .active-filters {
+    padding: 12px 14px;
+    border-radius: 18px;
+  }
+
+  .active-filters-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-chip-row {
+    gap: 8px;
+  }
+
+  .filter-chip,
+  .clear-all-button {
+    min-height: 36px;
+    font-size: 0.82rem;
+  }
 }
 
 @media (max-width: 640px) {
@@ -1233,6 +1323,16 @@ body {
   .data-table tbody {
     display: grid;
     gap: 10px;
+  }
+
+  .active-filters {
+    padding: 12px;
+    border-radius: 16px;
+  }
+
+  .filter-chip {
+    width: 100%;
+    justify-content: space-between;
   }
 
   .data-table tbody tr {
@@ -1426,6 +1526,16 @@ body {
   .detail-metric,
   .data-table tbody tr {
     border-radius: 16px;
+  }
+
+  .active-filters {
+    padding: 10px;
+  }
+
+  .filter-chip,
+  .clear-all-button {
+    min-height: 34px;
+    font-size: 0.78rem;
   }
 
   .data-table tbody tr {

@@ -32,6 +32,7 @@ const elements = {
   pageNumbers: document.querySelector("#page-numbers"),
   pageIndicator: document.querySelector("#page-indicator"),
   resultMeta: document.querySelector("#result-meta"),
+  activeFilters: document.querySelector("#active-filters"),
   heroStats: document.querySelector("#hero-stats"),
   lastUpdatedIndicator: document.querySelector("#last-updated-indicator"),
   featuredGrid: document.querySelector("#featured-grid"),
@@ -142,6 +143,15 @@ function bindEvents() {
 
     appState.currentPage = Number.parseInt(button.dataset.page, 10);
     renderUniversityTable(getSearchFilteredRows());
+  });
+
+  elements.activeFilters.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-clear-filter]");
+    if (!button) {
+      return;
+    }
+
+    clearFilter(button.dataset.clearFilter);
   });
 
   elements.stateGrid.addEventListener("click", handleJumpToState);
@@ -332,6 +342,7 @@ function renderUniversityTable(searchFiltered) {
   const searchSuffix = appState.query ? ` for "${appState.query}"` : "";
 
   elements.resultMeta.textContent = `${startLabel}-${endLabel} of ${sorted.length} universities shown${searchSuffix}`;
+  renderActiveFilters();
   elements.tableBody.innerHTML = paged.map(renderTableRow).join("");
   elements.emptyState.classList.toggle("hidden", sorted.length > 0);
   elements.pageIndicator.textContent = `Page ${sorted.length === 0 ? 0 : appState.currentPage} of ${totalPages}`;
@@ -339,6 +350,36 @@ function renderUniversityTable(searchFiltered) {
   elements.nextPageButton.disabled = appState.currentPage >= totalPages;
   renderPageNumbers(totalPages);
   renderDetailPanel(selectedItem);
+}
+
+function renderActiveFilters() {
+  const activeFilters = getActiveFilters();
+
+  if (activeFilters.length === 0) {
+    elements.activeFilters.innerHTML = "";
+    elements.activeFilters.classList.add("hidden");
+    return;
+  }
+
+  elements.activeFilters.classList.remove("hidden");
+  elements.activeFilters.innerHTML = `
+    <div class="active-filters-head">
+      <span class="active-filters-title">Active filters</span>
+      <button class="clear-all-button" type="button" data-clear-filter="all">Clear all</button>
+    </div>
+    <div class="filter-chip-row">
+      ${activeFilters
+        .map(
+          (filter) => `
+            <button class="filter-chip" type="button" data-clear-filter="${escapeAttribute(filter.key)}">
+              <span>${escapeHtml(filter.label)}</span>
+              <span class="filter-chip-close" aria-hidden="true">×</span>
+            </button>
+          `
+        )
+        .join("")}
+    </div>
+  `;
 }
 
 function renderLocations(items) {
@@ -655,6 +696,81 @@ function renderUnavailableListItem(message) {
       <span>${escapeHtml(message)}</span>
     </article>
   `;
+}
+
+function getActiveFilters() {
+  const filters = [];
+
+  if (appState.query) {
+    filters.push({ key: "query", label: `Search: ${appState.query}` });
+  }
+
+  if (appState.selectedState !== "all") {
+    filters.push({ key: "state", label: `State: ${appState.selectedState}` });
+  }
+
+  if (appState.rankBand !== "all") {
+    filters.push({ key: "rank", label: `Rank: Top ${appState.rankBand}` });
+  }
+
+  if (appState.sortBy !== "rank-asc") {
+    filters.push({ key: "sort", label: `Sort: ${getSortLabel(appState.sortBy)}` });
+  }
+
+  return filters;
+}
+
+function clearFilter(filterKey) {
+  const shouldResetQuery = filterKey === "all" || filterKey === "query";
+
+  if (filterKey === "all") {
+    appState.query = "";
+    appState.selectedState = "all";
+    appState.rankBand = "all";
+    appState.sortBy = "rank-asc";
+  }
+
+  if (filterKey === "query") {
+    appState.query = "";
+  }
+
+  if (filterKey === "state") {
+    appState.selectedState = "all";
+  }
+
+  if (filterKey === "rank") {
+    appState.rankBand = "all";
+  }
+
+  if (filterKey === "sort") {
+    appState.sortBy = "rank-asc";
+  }
+
+  appState.currentPage = 1;
+  syncControlValues({ syncQuery: shouldResetQuery });
+  renderAll();
+}
+
+function syncControlValues({ syncQuery = false } = {}) {
+  if (syncQuery) {
+    elements.searchInput.value = appState.query;
+  }
+
+  elements.stateFilter.value = appState.selectedState;
+  elements.rankFilter.value = appState.rankBand;
+  elements.sortSelect.value = appState.sortBy;
+}
+
+function getSortLabel(sortBy) {
+  const labels = {
+    "rank-asc": "Best rank",
+    "name-asc": "Name A-Z",
+    "tuition-desc": "Highest tuition",
+    "tuition-asc": "Lowest tuition",
+    "enrollment-desc": "Largest enrollment",
+  };
+
+  return labels[sortBy] || sortBy;
 }
 
 function renderLinkButton(href, label, className) {
