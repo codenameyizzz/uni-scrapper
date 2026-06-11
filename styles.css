@@ -967,38 +967,41 @@ body {
 
 @media (max-width: 720px) {
   .app-shell {
-    padding: 10px;
+    padding: 8px;
   }
 
   .dashboard-shell {
-    padding: 12px;
+    padding: 10px;
+    border-radius: 22px;
   }
 
   .sticky-header {
     top: 0;
-    padding-bottom: 10px;
+    padding-bottom: 8px;
   }
 
   .topbar {
-    gap: 12px;
-    padding: 10px;
-    border-radius: 24px;
+    gap: 10px;
+    padding: 9px;
+    border-radius: 20px;
   }
 
   .brand-pill {
     justify-content: flex-start;
-    padding: 10px 14px;
+    padding: 9px 12px;
   }
 
   .nav-pill {
-    height: 42px;
-    padding: 0 14px;
+    height: 38px;
+    padding: 0 13px;
+    font-size: 0.88rem;
     white-space: nowrap;
   }
 
   .topbar-tools {
     display: grid;
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .search-pill,
@@ -1006,42 +1009,56 @@ body {
     width: 100%;
   }
 
+  .search-pill,
+  .source-pill,
+  .select-pill select {
+    min-height: 44px;
+  }
+
   .hero-copy,
   .hero-stats,
   .overview-card,
   .table-card,
   .detail-card {
-    padding: 18px;
-    border-radius: 22px;
+    padding: 16px;
+    border-radius: 20px;
+  }
+
+  .detail-card {
+    min-height: auto;
   }
 
   .hero-copy h1 {
     max-width: none;
-    font-size: clamp(1.7rem, 8vw, 2.5rem);
+    font-size: clamp(1.6rem, 7.4vw, 2.15rem);
+    line-height: 1.06;
   }
 
   .hero-text {
-    line-height: 1.7;
-    font-size: 0.95rem;
+    margin-top: 14px;
+    line-height: 1.62;
+    font-size: 0.92rem;
   }
 
   .section-head,
   .detail-top {
-    gap: 12px;
+    gap: 10px;
   }
 
   .section-head h2,
   .compact-head h2 {
-    font-size: 1.55rem;
+    font-size: 1.35rem;
   }
 
   .section-actions {
     width: 100%;
+    gap: 8px;
   }
 
   .select-pill {
     width: 100%;
     justify-content: space-between;
+    padding: 5px 8px 5px 12px;
   }
 
   .select-pill select {
@@ -1050,8 +1067,22 @@ body {
   }
 
   .metric-card {
-    padding: 18px;
-    border-radius: 20px;
+    padding: 15px;
+    border-radius: 18px;
+  }
+
+  .metric-kicker {
+    font-size: 0.72rem;
+  }
+
+  .metric-value {
+    margin-top: 10px;
+    font-size: 1.7rem;
+  }
+
+  .metric-subtext {
+    margin-top: 6px;
+    font-size: 0.8rem;
   }
 
   .featured-card,
@@ -1059,14 +1090,38 @@ body {
   .list-item,
   .detail-metric,
   .info-item {
-    border-radius: 18px;
+    border-radius: 16px;
+  }
+
+  .featured-image,
+  .detail-photo {
+    aspect-ratio: 4 / 3;
+  }
+
+  .featured-body {
+    padding: 14px;
+  }
+
+  .featured-body h3,
+  .state-card h3,
+  .tuition-column h3,
+  .detail-card h3 {
+    font-size: 1.1rem;
+  }
+
+  .featured-summary,
+  .info-item span,
+  .state-card p,
+  .detail-summary {
+    line-height: 1.58;
+    font-size: 0.9rem;
   }
 
   .detail-badge {
-    min-width: 58px;
-    height: 58px;
-    border-radius: 18px;
-    font-size: 1.2rem;
+    min-width: 54px;
+    height: 54px;
+    border-radius: 16px;
+    font-size: 1.08rem;
   }
 
   .detail-actions,
@@ -1083,24 +1138,51 @@ body {
   .open-link,
   .detail-link {
     width: 100%;
+    min-height: 40px;
+    padding-inline: 12px;
+    font-size: 0.84rem;
   }
 
   .pagination-bar {
     align-items: stretch;
+    gap: 10px;
   }
 
   .pager-button {
     width: 100%;
     min-width: 0;
+    height: 38px;
+    font-size: 0.86rem;
+  }
+
+  .page-number {
+    min-width: 36px;
+    height: 36px;
+    font-size: 0.82rem;
+  }
+
+  .table-meta {
+    gap: 10px;
+    font-size: 0.84rem;
   }
 }
 
 @media (max-width: 640px) {
+  .views {
+    margin-top: 4px;
+  }
+
+  .hero-row,
+  .overview-grid,
+  .content-row {
+    gap: 14px;
+  }
+
   .table-wrap {
     overflow: visible;
     border: 0;
     background: transparent;
-    margin-top: 16px;
+    margin-top: 14px;
   }
 
   .data-table,
@@ -1122,13 +1204,13 @@ body {
 
   .data-table tbody {
     display: grid;
-    gap: 12px;
+    gap: 10px;
   }
 
   .data-table tbody tr {
-    padding: 16px;
+    padding: 14px;
     border: 1px solid var(--line);
-    border-radius: 20px;
+    border-radius: 18px;
     background: #fcfcfc;
   }
 
@@ -1142,40 +1224,84 @@ body {
   }
 
   .data-table tbody td + td {
-    margin-top: 12px;
+    margin-top: 10px;
   }
 
   .data-table tbody td::before {
     content: attr(data-label);
     display: block;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     color: var(--muted-soft);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     font-weight: 700;
-    letter-spacing: 0.12em;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
   }
 
   .school-cell {
     align-items: flex-start;
+    gap: 10px;
   }
 
   .school-mark {
-    width: 38px;
-    height: 38px;
-    border-radius: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-size: 0.72rem;
+  }
+
+  .school-text strong {
+    font-size: 0.93rem;
+    line-height: 1.28;
+  }
+
+  .school-text span,
+  .list-item-meta,
+  .value-main {
+    font-size: 0.84rem;
+    line-height: 1.45;
   }
 
   .rank-pill {
-    min-height: 30px;
+    min-height: 28px;
+    padding-inline: 10px;
+    font-size: 0.76rem;
   }
 
   .page-numbers {
     justify-content: flex-start;
+    gap: 6px;
   }
 
   .page-indicator {
     text-align: center;
+    font-size: 0.84rem;
+  }
+
+  .detail-top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .detail-badge {
+    align-self: flex-start;
+  }
+
+  .detail-grid {
+    gap: 10px;
+    margin-top: 18px;
+  }
+
+  .detail-metric {
+    padding: 12px 14px;
+  }
+
+  .info-stack,
+  .list-stack,
+  .link-stack,
+  .state-list,
+  .button-row {
+    gap: 10px;
   }
 }
 
@@ -1185,22 +1311,111 @@ body {
   .overview-card,
   .table-card,
   .detail-card {
-    padding: 16px;
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .sticky-header {
+    padding-bottom: 6px;
+  }
+
+  .topbar {
+    padding: 8px;
+    border-radius: 18px;
+  }
+
+  .brand-pill {
+    padding: 8px 11px;
+  }
+
+  .brand-name {
+    font-size: 0.9rem;
+  }
+
+  .nav-pill {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 0.82rem;
+  }
+
+  .search-pill {
+    gap: 8px;
+    padding-inline: 12px;
+  }
+
+  .search-pill input {
+    font-size: 0.9rem;
   }
 
   .metric-value {
-    font-size: 1.65rem;
+    font-size: 1.52rem;
   }
 
   .featured-body h3,
   .state-card h3,
   .tuition-column h3,
   .detail-card h3 {
-    font-size: 1.15rem;
+    font-size: 1.02rem;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(1.42rem, 7vw, 1.82rem);
+  }
+
+  .hero-text,
+  .featured-summary,
+  .info-item span,
+  .state-card p,
+  .detail-summary,
+  .list-item-meta,
+  .value-main {
+    font-size: 0.86rem;
+  }
+
+  .section-label,
+  .eyebrow {
+    margin-bottom: 10px;
+    font-size: 0.67rem;
+    letter-spacing: 0.14em;
+  }
+
+  .section-head h2,
+  .compact-head h2 {
+    font-size: 1.18rem;
+  }
+
+  .metric-card,
+  .info-item,
+  .list-item,
+  .state-card,
+  .detail-metric,
+  .data-table tbody tr {
+    border-radius: 16px;
+  }
+
+  .data-table tbody tr {
+    padding: 12px;
+  }
+
+  .mini-button,
+  .resource-link,
+  .ghost-link,
+  .open-link,
+  .detail-link,
+  .pager-button {
+    min-height: 38px;
+    font-size: 0.81rem;
+  }
+
+  .page-number {
+    min-width: 34px;
+    height: 34px;
+    font-size: 0.78rem;
   }
 
   .site-footer {
-    padding-inline: 10px;
+    margin-top: 18px;
+    padding: 14px 8px 4px;
   }
 
   .site-footer p {
