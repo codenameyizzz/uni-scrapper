@@ -608,7 +608,6 @@ function renderTableRow(item) {
     <tr data-id="${escapeAttribute(item.id)}" class="${isSelected ? "is-selected" : ""}">
       <td data-label="University">
         <div class="school-cell">
-          <span class="school-mark">${escapeHtml(item.code)}</span>
           <div class="school-text">
             <strong>${escapeHtml(item.schoolName)}</strong>
             <span>${escapeHtml(item.rankLabel)}</span>
